@@ -1,0 +1,14 @@
+sim_build/
+__pycache__/
+*.vcd
+*.fst
+results.xml
+obj_dir/
+formal/*/
+!formal/*.sby
+coverage_raw/
+*.dat
+.pytest_cache/
+fpga/de10_lite/db/
+fpga/de10_lite/incremental_db/
+fpga/de10_lite/output_files/
