@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import cocotb
 import pyuvm
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge
+from cocotb.triggers import ClockCycles, FallingEdge, First, RisingEdge
 from pyuvm import ConfigDB, uvm_test
 
 from memtb import config
@@ -47,14 +47,39 @@ class BaseTest(uvm_test):
     async def stimulus(self):
         raise NotImplementedError
 
+    async def watchdog(self):
+        """Stop early once any checker has fired, and never let a stuck
+        controller hang the simulation."""
+        dut = cocotb.top
+        sb = self.env.scoreboard
+        last, idle = -1, 0
+        while True:
+            await ClockCycles(dut.clk, 2000)
+            if int(dut.violation_count.value) or int(dut.prop_fail_count.value) or sb.errors:
+                self.logger.error("a checker fired, ending the test early")
+                return
+            done = sb.reads + sb.writes
+            idle = idle + 1 if done == last else 0
+            last = done
+            if idle >= 200:
+                self.logger.error("no request accepted for 400,000 clocks")
+                self.hung = True
+                return
+
+    async def body(self):
+        await self.wait_init()
+        await self.stimulus()
+        await ClockCycles(cocotb.top.clk, self.drain_cycles)
+
     async def run_phase(self):
         self.raise_objection()
         dut = cocotb.top
+        self.hung = False
         cocotb.start_soon(Clock(dut.clk, self.cfg.clk_period_ps, unit="ps").start())
         await self.reset()
-        await self.wait_init()
-        await self.stimulus()
-        await ClockCycles(dut.clk, self.drain_cycles)
+        body = cocotb.start_soon(self.body())
+        dog = cocotb.start_soon(self.watchdog())
+        await First(body, dog)
         self.drop_objection()
 
     def check_phase(self):
@@ -69,6 +94,7 @@ class BaseTest(uvm_test):
         self.logger.info(f"writes={sb.writes} reads={sb.reads} compared={sb.compared} "
                          f"mismatches={sb.errors} bus_violations={viol} "
                          f"property_failures={props} coverage={cov.percent():.1f}%")
+        assert not self.hung, "controller stopped accepting requests"
         assert sb.errors == 0, f"{sb.errors} scoreboard errors"
         assert not sb.expected, f"{len(sb.expected)} reads never answered"
         assert viol == 0, f"{viol} bus protocol violations"

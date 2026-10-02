@@ -28,11 +28,20 @@ INIT_PAIRS = {
 
 # Timing rules that must be seen at exactly their minimum spacing
 # (index = rule id in the bus model).
+#
+# Excluded on purpose, with the reasoning in docs/verification_plan.md:
+#   tRRD            the controller serves one request at a time, so a read or
+#                   write (after tRCD >= tRRD) always sits between two
+#                   activates; tRRD can never be the limiting rule
+#   SDR tMRD and    the first command after initialization needs a request to
+#   DDR3 tZQinit    be accepted first, which takes longer than the rule
+# These rules are still checked on every command; only the "seen at minimum"
+# bin is excluded.
 MIN_RULES = {
-    "SDR": {3: "tMRD", 4: "tRCD", 5: "tRAS", 6: "tRC", 7: "tRP", 8: "tRRD",
+    "SDR": {4: "tRCD", 5: "tRAS", 6: "tRC", 7: "tRP",
             9: "tWR", 10: "tRFC", 14: "read_to_write"},
-    "DDR3": {2: "tXPR", 5: "tMRD", 6: "tMOD", 7: "tZQinit", 8: "tRCD", 9: "tRAS",
-             10: "tRC", 11: "tRP", 12: "tRRD", 13: "tWR", 14: "tRFC", 18: "tCCD",
+    "DDR3": {2: "tXPR", 5: "tMRD", 6: "tMOD", 8: "tRCD", 9: "tRAS",
+             10: "tRC", 11: "tRP", 13: "tWR", 14: "tRFC", 18: "tCCD",
              19: "write_to_read", 20: "tRTP", 21: "read_to_write"},
 }
 

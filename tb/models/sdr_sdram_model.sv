@@ -18,6 +18,7 @@ module sdr_sdram_model
   parameter int REF_MAX     = 8
 )(
   input  logic        sd_clk,
+  input  logic        power_cycle,    // testbench: the chip was power cycled
   input  logic        sd_cke,
   input  logic        sd_cs_n,
   input  logic        sd_ras_n,
@@ -131,13 +132,27 @@ module sdr_sdram_model
 
   always @(posedge sd_clk) begin
     cyc <= cyc + 1;
-    if (!seen_edge) begin
+    if (power_cycle) begin
+      // contents and state are gone; initialization is checked again
+      seen_edge      <= 1'b0;
+      seen_prea      <= 1'b0;
+      seen_mrs       <= 1'b0;
+      init_ok        <= 1'b0;
+      init_refs      <= 0;
+      refs_done      <= 0;
+      starve_flagged <= 1'b0;
+      bank_open      <= '0;
+      prev_cmd       <= CMD_NOP;
+      rd_vld_sr      <= '0;
+      t_ref          <= NEVER;
+      t_mrs          <= NEVER;
+    end else if (!seen_edge) begin
       seen_edge    <= 1'b1;
       t_first_edge <= $time;
     end
 
     // read data pipeline: sampled at T0, driven from T(CL-1) to T(CL)
-    rd_vld_sr     <= {rd_vld_sr[2:0], 1'b0};
+    if (!power_cycle) rd_vld_sr <= {rd_vld_sr[2:0], 1'b0};
     rd_data_sr[1] <= rd_data_sr[0];
     rd_data_sr[2] <= rd_data_sr[1];
     dq_out_en     <= (CL == 2) ? rd_vld_sr[0] : rd_vld_sr[1];
@@ -145,7 +160,7 @@ module sdr_sdram_model
 
     if (dq_in_oe && dq_out_en) viol(R_CONTENTION, "bus contention", 0, 0);
 
-    c = sd_cke ? pins_cmd(sd_cs_n, sd_ras_n, sd_cas_n, sd_we_n, sd_addr[10]) : CMD_NOP;
+    c = (sd_cke && !power_cycle) ? pins_cmd(sd_cs_n, sd_ras_n, sd_cas_n, sd_we_n, sd_addr[10]) : CMD_NOP;
     b = sd_ba;
 
     if (c != CMD_NOP) begin

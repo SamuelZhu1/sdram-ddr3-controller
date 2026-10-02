@@ -327,7 +327,7 @@ module mem_ctrl_core
               open[r_bank]   <= 1'b1;
               row[r_bank]    <= r_row;
 `ifdef BUG_TRCD_OFF1
-              rw_ok[r_bank]  <= ld(rw_ok[r_bank], C_RCD - 1);
+              rw_ok[r_bank]  <= ld(rw_ok[r_bank], imax(C_RCD - 1, 1));
 `else
               rw_ok[r_bank]  <= ld(rw_ok[r_bank], C_RCD);
 `endif

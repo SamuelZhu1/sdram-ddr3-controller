@@ -83,7 +83,7 @@ module tb_top
       .CL(CL), .CLK_PERIOD_PS(CLK_PERIOD_PS), .T_PWR_PS(PWR_PS),
       .T_REFI_PS(REFI_PS), .REF_MAX(REF_MAX)
     ) u_mem (
-      .sd_clk(~clk), .sd_cke, .sd_cs_n, .sd_ras_n, .sd_cas_n, .sd_we_n,
+      .sd_clk(~clk), .power_cycle(!rst_n), .sd_cke, .sd_cs_n, .sd_ras_n, .sd_cas_n, .sd_we_n,
       .sd_ba, .sd_addr, .sd_dqm,
       .dq_in(sd_dq_o), .dq_in_oe(sd_dq_oe), .dq_out(m_dq), .dq_out_en(m_dq_en),
       .violation_count, .last_violation,
