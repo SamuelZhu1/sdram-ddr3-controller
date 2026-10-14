@@ -245,6 +245,8 @@ module mem_ctrl_core
 
       case (state)
         // ---------------- initialization ----------------
+        // A step issues its command and loads its wait minus one, so the
+        // next step's command lands exactly that many cycles later.
         S_INIT: begin
           if (gen_cnt == '0) begin
             step <= step + 1'b1;
@@ -255,10 +257,10 @@ module mem_ctrl_core
                 cmd       <= CMD_PREA;
                 cmd_a     <= 14'h0400;
 `endif
-                gen_cnt   <= cnt_t'(C_RP);
+                gen_cnt   <= cnt_t'(C_RP - 1);
               end else if (step <= 4'(SDR_INIT_REFS)) begin
                 cmd       <= CMD_REF;
-                gen_cnt   <= cnt_t'(C_RFC);
+                gen_cnt   <= cnt_t'(C_RFC - 1);
               end else if (step == 4'(SDR_INIT_REFS + 1)) begin
                 cmd       <= CMD_MRS;
                 cmd_ba    <= '0;
@@ -268,7 +270,7 @@ module mem_ctrl_core
 `else
                 cmd_a     <= {7'b0, 3'(CL), 4'b0000};
 `endif
-                gen_cnt   <= cnt_t'(C_MRD);
+                gen_cnt   <= cnt_t'(C_MRD - 1);
               end else begin
                 init_done <= 1'b1;
                 state     <= S_RUN;
@@ -277,10 +279,10 @@ module mem_ctrl_core
               // reset release, CKE, MR2, MR3, MR1, MR0, ZQCL
               case (step)
                 4'd0: begin dev_reset_n <= 1'b1; gen_cnt <= cnt_t'(C_CKE); end
-                4'd1: begin dev_cke     <= 1'b1; gen_cnt <= cnt_t'(C_XPR); end
-                4'd2: begin cmd <= CMD_MRS; cmd_ba <= 3'd2; cmd_a <= 14'h0000; gen_cnt <= cnt_t'(C_MRD); end
-                4'd3: begin cmd <= CMD_MRS; cmd_ba <= 3'd3; cmd_a <= 14'h0000; gen_cnt <= cnt_t'(C_MRD); end
-                4'd4: begin cmd <= CMD_MRS; cmd_ba <= 3'd1; cmd_a <= 14'h0004; gen_cnt <= cnt_t'(C_MRD); end
+                4'd1: begin dev_cke     <= 1'b1; gen_cnt <= cnt_t'(C_XPR - 1); end
+                4'd2: begin cmd <= CMD_MRS; cmd_ba <= 3'd2; cmd_a <= 14'h0000; gen_cnt <= cnt_t'(C_MRD - 1); end
+                4'd3: begin cmd <= CMD_MRS; cmd_ba <= 3'd3; cmd_a <= 14'h0000; gen_cnt <= cnt_t'(C_MRD - 1); end
+                4'd4: begin cmd <= CMD_MRS; cmd_ba <= 3'd1; cmd_a <= 14'h0004; gen_cnt <= cnt_t'(C_MRD - 1); end
                 4'd5: begin
                   cmd    <= CMD_MRS;
                   cmd_ba <= 3'd0;
@@ -290,9 +292,9 @@ module mem_ctrl_core
 `else
                   cmd_a  <= 14'h0510;
 `endif
-                  gen_cnt <= cnt_t'(C_MOD);
+                  gen_cnt <= cnt_t'(C_MOD - 1);
                 end
-                4'd6: begin cmd <= CMD_ZQCL; cmd_a <= 14'h0400; gen_cnt <= cnt_t'(C_ZQI); end
+                4'd6: begin cmd <= CMD_ZQCL; cmd_a <= 14'h0400; gen_cnt <= cnt_t'(C_ZQI - 1); end
                 default: begin
                   init_done <= 1'b1;
                   state     <= S_RUN;

@@ -170,6 +170,7 @@ module ddr3_dfi_model
       t_mrs          <= NEVER;
       t_zq           <= NEVER;
       t_ref          <= NEVER;
+      prev_cmd       <= CMD_NOP;
     end
     if (!rst_q && dfi_reset_n) begin
       t_rst_rise <= $time;
@@ -191,10 +192,19 @@ module ddr3_dfi_model
     wv[15] <= 1'b0;
     rv[15] <= 1'b0;
 
+    if (!dfi_reset_n) begin
+      // a reset abandons any burst in flight
+      for (int i = 0; i < 16; i++) begin
+        wv[i] <= 1'b0;
+        rv[i] <= 1'b0;
+      end
+    end
+
     // write data must arrive exactly in its window
-    if (wv[0] != dfi_wrdata_en)
+    if (!dfi_reset_n) begin
+    end else if (wv[0] != dfi_wrdata_en)
       viol(R_WRDATA, "dfi_wrdata_en outside the write window", longint'(dfi_wrdata_en), longint'(wv[0]));
-    if (wv[0] && !dfi_odt) viol(R_ODT, "ODT low during write data", 0, 1);
+    if (dfi_reset_n && wv[0] && !dfi_odt) viol(R_ODT, "ODT low during write data", 0, 1);
     if (wv[0] && dfi_wrdata_en) begin
       word = mem.exists(waddr[0]) ? mem[waddr[0]] : 64'h0;
       word[16*wbeat[0] +: 16] = dfi_wrdata;
@@ -202,7 +212,7 @@ module ddr3_dfi_model
     end
 
     // read data enable must match its window; the PHY answers PHY_RDLAT later
-    if (rv[0] != dfi_rddata_en)
+    if (dfi_reset_n && rv[0] != dfi_rddata_en)
       viol(R_RDDATA_EN, "dfi_rddata_en outside the read window", longint'(dfi_rddata_en), longint'(rv[0]));
     ret_v[0] <= dfi_rddata_en;
     if (rv[0]) begin

@@ -155,6 +155,9 @@ class IdleTest(BaseTest):
     closed."""
 
     async def stimulus(self):
+        # longer than one refresh interval, so the first command after
+        # initialization is a refresh
+        await ClockCycles(cocotb.top.clk, 4000)
         await self.run_seq(RandomSeq("idle", self.cfg, self.rng, max(self.cfg.n_txn // 8, 50),
                                      gap_weights=(10, 10, 20, 60)))
 
