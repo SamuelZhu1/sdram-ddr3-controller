@@ -22,6 +22,7 @@ module mem_ctrl_core
   parameter int T_REFI_CK     = 0,       // 0 = datasheet refresh interval
   parameter int REF_FORCE     = 4,       // postponed refreshes before traffic is held
   parameter int REF_MAX       = 8,
+  parameter int CW            = 20,      // timing counter width (500 us at 2.5 ns fits)
   parameter int AW            = ROW_W + BA_W + COL_W
 )(
   input  logic          clk,
@@ -47,7 +48,6 @@ module mem_ctrl_core
   localparam int NB = 1 << BA_W;
 `include "mem_timing.svh"
 
-  localparam int CW = 20;  // counter width, enough for 500 us at 2.5 ns
   typedef logic [CW-1:0] cnt_t;
 
   // Load a counter so the next command is legal N cycles after this one,
@@ -367,5 +367,17 @@ module mem_ctrl_core
       endcase
     end
   end
+
+`ifdef FORMAL
+  // The protocol properties, checked for every input sequence.
+  mem_ctrl_props #(
+    .MEM_TYPE(MEM_TYPE), .CLK_PERIOD_PS(CLK_PERIOD_PS), .CL(CL),
+    .T_PWR_CK(T_PWR_CK), .T_REFI_CK(T_REFI_CK), .BA_W(BA_W),
+    .REF_MAX(REF_MAX), .REF_FORCE(REF_FORCE), .SW(CW)
+  ) u_props (
+    .clk, .rst_n, .cmd, .cmd_ba, .init_done, .req_valid, .req_ready,
+    .have_req, .d_fire, .ref_debt, .ref_overflow, .fail_count()
+  );
+`endif
 
 endmodule

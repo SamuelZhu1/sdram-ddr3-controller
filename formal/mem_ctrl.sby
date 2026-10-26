@@ -1,0 +1,19 @@
+# Builds the formal model. The proof itself is run by prove.sh, which calls
+# ABC's PDR engine directly (the sby wrapper passes it a flag that the
+# packaged ABC does not accept).
+[options]
+mode prove
+
+[engines]
+abc pdr
+
+[script]
+read -formal -sv DEFINES mem_ctrl_props.sv mem_ctrl_core.sv mem_ctrl_formal.sv
+prep -top mem_ctrl_formal
+
+[files]
+gen/mem_defs.svh
+gen/mem_timing.svh
+gen/mem_ctrl_props.sv
+gen/mem_ctrl_core.sv
+gen/mem_ctrl_formal.sv

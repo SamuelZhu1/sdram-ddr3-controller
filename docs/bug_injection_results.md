@@ -8,20 +8,20 @@ that fired first.
 
 | Bug | Memory | Caught by test | First checker to fire |
 |---|---|---|---|
-| nanoseconds converted to clock cycles by rounding down (`BUG_ROUND_DOWN`) | SDR | 143mhz / RandomTest | bus model: tRCD |
-| activate-to-read/write counter one cycle short (`BUG_TRCD_OFF1`) | SDR | default / RandomTest | property p_request_served |
-| minimum row-open time (tRAS) not enforced (`BUG_NO_TRAS`) | SDR | 143mhz / RandomTest | property p_tras |
-| write recovery before precharge (tWR) not enforced (`BUG_NO_TWR`) | SDR | 143mhz / RandomTest | property p_wr_to_pre |
-| precharge time before activate (tRP) not enforced (`BUG_NO_TRP`) | SDR | 143mhz / RandomTest | property p_trp |
-| refresh recovery time (tRFC) not enforced (`BUG_NO_TRFC`) | SDR | default / RandomTest | property p_trfc_act |
-| activate-to-activate spacing across banks (tRRD) not enforced (`BUG_NO_TRRD`) | SDR | **not caught** | |
-| read-to-write bus turnaround not enforced (`BUG_RD2WR`) | SDR | default / RandomTest | property p_rd_to_wr |
-| precharge sent to bank 0 instead of the requested bank (`BUG_PRE_WRONG_BANK`) | SDR | default / RandomTest | property p_act_bank_closed |
-| open-row hit ignores the row address (`BUG_HIT_IGNORES_ROW`) | SDR | default / RandomTest | scoreboard: read data mismatch |
-| refresh issued without closing open rows (`BUG_REF_NO_PREA`) | SDR | default / RandomTest | property p_ref_all_closed |
-| one refresh clears every postponed refresh (`BUG_REF_DEBT_DROP`) | SDR | 143mhz / RowThrashTest | bus model: refresh behind schedule |
-| refresh interval twice too long (`BUG_REFI_SLOW`) | SDR | default / RandomTest | bus model: refresh behind schedule |
-| initialization skips precharge-all (`BUG_INIT_NO_PREA`) | SDR | default / RandomTest | bus model: refresh before precharge-all |
-| wrong CAS latency written to the mode register (`BUG_MRS_CL`) | SDR | default / RandomTest | bus model: mode register value |
-| a new request accepted while one is still waiting (`BUG_READY_DROP`) | SDR | default / RandomTest | property p_no_request_dropped |
-| read data captured one cycle late (`BUG_RD_LAT`) | SDR | default / RandomTest | scoreboard: read data mismatch |
+| nanoseconds converted to clock cycles by rounding down (`BUG_ROUND_DOWN`) | DDR3 | default / RandomTest | bus model: tRCD |
+| activate-to-read/write counter one cycle short (`BUG_TRCD_OFF1`) | DDR3 | default / RandomTest | property p_trcd_wr |
+| minimum row-open time (tRAS) not enforced (`BUG_NO_TRAS`) | DDR3 | default / RandomTest | property p_tras |
+| write recovery before precharge (tWR) not enforced (`BUG_NO_TWR`) | DDR3 | default / RandomTest | property p_wr_to_pre |
+| precharge time before activate (tRP) not enforced (`BUG_NO_TRP`) | DDR3 | default / RandomTest | property p_trp |
+| refresh recovery time (tRFC) not enforced (`BUG_NO_TRFC`) | DDR3 | default / RandomTest | property p_trfc_act |
+| activate-to-activate spacing across banks (tRRD) not enforced (`BUG_NO_TRRD`) | DDR3 | **not caught** | |
+| read-to-write bus turnaround not enforced (`BUG_RD2WR`) | DDR3 | default / RandomTest | property p_rd_to_wr |
+| write-to-read spacing (tWTR) not enforced (`BUG_NO_WR2RD`) | DDR3 | default / RandomTest | property p_wr_to_rd |
+| precharge sent to bank 0 instead of the requested bank (`BUG_PRE_WRONG_BANK`) | DDR3 | default / RandomTest | property p_act_bank_closed |
+| open-row hit ignores the row address (`BUG_HIT_IGNORES_ROW`) | DDR3 | default / RandomTest | scoreboard: read data mismatch |
+| refresh issued without closing open rows (`BUG_REF_NO_PREA`) | DDR3 | default / RandomTest | property p_ref_all_closed |
+| one refresh clears every postponed refresh (`BUG_REF_DEBT_DROP`) | DDR3 | default / RowThrashTest | bus model: refresh behind schedule |
+| refresh interval twice too long (`BUG_REFI_SLOW`) | DDR3 | default / RandomTest | bus model: refresh behind schedule |
+| wrong CAS latency written to the mode register (`BUG_MRS_CL`) | DDR3 | default / RandomTest | bus model: MR0 value |
+| a new request accepted while one is still waiting (`BUG_READY_DROP`) | DDR3 | default / RandomTest | property p_no_request_dropped |
+| write data beats sent in reverse order (`BUG_WBEAT_ORDER`) | DDR3 | default / RandomTest | scoreboard: read data mismatch |

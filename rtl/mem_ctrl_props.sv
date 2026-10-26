@@ -14,7 +14,8 @@ module mem_ctrl_props
   parameter int T_REFI_CK     = 0,
   parameter int BA_W          = 2,
   parameter int REF_MAX       = 8,
-  parameter int REF_FORCE     = 4
+  parameter int REF_FORCE     = 4,
+  parameter int SW            = 12       // width of the spacing counters
 )(
   input  logic       clk,
   input  logic       rst_n,
@@ -38,7 +39,6 @@ module mem_ctrl_props
   localparam int WAIT_LIMIT = (REF_FORCE + 2) * (C_RFC + C_RP + 2) + C_RAS + C_WR2PRE
                             + C_RP + C_RC + C_RCD + C_WR2RD + C_RD2WR + 16;
 
-  localparam int SW = 12;
   typedef logic [SW-1:0] age_t;
   function automatic age_t inc(input age_t a);
     inc = (&a) ? a : a + 1'b1;
@@ -55,7 +55,7 @@ module mem_ctrl_props
   assign b = cmd_ba[BA_W-1:0];
 
 `ifdef FORMAL
-  `define CHK(name, cond) name: assert (cond)
+  `define CHK(name, cond) assert (cond)
 `else
   `define CHK(name, cond) \
     if (!(cond)) begin \
