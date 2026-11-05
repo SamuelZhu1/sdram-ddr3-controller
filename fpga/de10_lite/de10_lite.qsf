@@ -1,0 +1,32 @@
+# Quartus Prime Lite project settings for the Terasic DE10-Lite.
+set_global_assignment -name FAMILY "MAX 10"
+set_global_assignment -name DEVICE 10M50DAF484C7G
+set_global_assignment -name TOP_LEVEL_ENTITY de10_lite_top
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/mem_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/mem_ctrl_core.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/sdr_backend.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/dfi_backend.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/mem_ctrl.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/mem_bist.sv
+set_global_assignment -name SYSTEMVERILOG_FILE de10_lite_top.sv
+set_global_assignment -name SEARCH_PATH ../../rtl
+set_global_assignment -name SDC_FILE de10_lite.sdc
+set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to *
+# register the SDRAM pins in the I/O cells so every pin has the same delay
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_*
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to DRAM_DQ[*]
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to DRAM_DQ[*]
+
+# ---------------------------------------------------------------------------
+# PIN LOCATIONS
+# Do not type these from memory. Open Terasic's DE10-Lite "golden top"
+# project (DE10_LITE_Golden_Top.qsf on the DE10-Lite CD / System Builder) and
+# paste its set_location_assignment lines for these ports below. The port
+# names in de10_lite_top.sv match Terasic's names exactly, so the lines can be
+# copied unchanged:
+#   MAX10_CLK1_50, KEY[1:0], SW[9:0], LEDR[9:0], HEX0..HEX5[7:0],
+#   DRAM_ADDR[12:0], DRAM_BA[1:0], DRAM_CAS_N, DRAM_CKE, DRAM_CLK, DRAM_CS_N,
+#   DRAM_DQ[15:0], DRAM_LDQM, DRAM_RAS_N, DRAM_UDQM, DRAM_WE_N
+# ---------------------------------------------------------------------------
