@@ -1,0 +1,5 @@
+cocotb==2.1.0
+pyuvm==5.0.0
+verilator==5.48.0
+yowasp-yosys
+z3-solver
